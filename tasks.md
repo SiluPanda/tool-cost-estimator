@@ -3,7 +3,7 @@
 ## Phase 1: Project Setup and Scaffolding
 
 - [ ] **Install dev dependencies** — Add `typescript`, `vitest`, `eslint`, and `js-tiktoken` (as devDependency) to `package.json`. Run `npm install` to generate `node_modules` and `package-lock.json`. | Status: not_done
-- [ ] **Configure ESLint** — Create an ESLint configuration file for TypeScript. Match conventions used in the broader monorepo. | Status: not_done
+- [x] **Configure ESLint** — Create an ESLint configuration file for TypeScript. Match conventions used in the broader monorepo. | Status: done
 - [ ] **Add CLI binary entry to package.json** — Add a `"bin": { "tool-cost-estimator": "dist/cli.js" }` field to `package.json` so the CLI is available after global install or via `npx`. | Status: not_done
 - [ ] **Add optional peer dependency for js-tiktoken** — Add `"peerDependencies": { "js-tiktoken": ">=1.0.0" }` with `"peerDependenciesMeta": { "js-tiktoken": { "optional": true } }` to `package.json`. | Status: not_done
 - [ ] **Create the file structure** — Create all source files as defined in the spec: `src/index.ts`, `src/types.ts`, `src/estimate-tools.ts`, `src/analyze-tool-set.ts`, `src/suggest-optimizations.ts`, `src/create-estimator.ts`, `src/serializer.ts`, `src/openai-serializer.ts`, `src/json-serializer.ts`, `src/format-detector.ts`, `src/token-counter.ts`, `src/schema-walker.ts`, `src/cost-projections.ts`, `src/suggestion-rules.ts`, `src/cli.ts`. Create the test directory `src/__tests__/` with placeholder test files. | Status: not_done
@@ -11,26 +11,26 @@
 ## Phase 2: Core Types
 
 - [ ] **Define all TypeScript interfaces and types in `src/types.ts`** — Implement every type from the spec: `OpenAIToolDefinition`, `AnthropicToolDefinition`, `MCPToolDefinition`, `ToolDefinition` (union type), `JsonSchema`, `EstimateToolsOptions`, `AnalyzeOptions`, `OptimizationOptions`, `EstimatorConfig`, `Estimator`, `ToolCostReport`, `ToolAnalysis`, `CostProjection`, `ToolSetAnalysis`, `OptimizationSuggestion`. Ensure all fields, optionality markers, and JSDoc comments match the spec exactly. | Status: not_done
-- [ ] **Export all types from `src/index.ts`** — Re-export every public type from `src/types.ts` and every public function from the other modules, matching the `Type Exports` section of the spec. | Status: not_done
+- [x] **Export all types from `src/index.ts`** — Re-export every public type from `src/types.ts` and every public function from the other modules, matching the `Type Exports` section of the spec. | Status: done
 
 ## Phase 3: Format Detection
 
-- [ ] **Implement format detector in `src/format-detector.ts`** — Write a function that accepts a `ToolDefinition[]` and returns `'openai' | 'anthropic' | 'mcp'`. Detection rules: if the object has `type: 'function'` and `function.name`, it is OpenAI format; if it has `name` and `input_schema`, it is Anthropic format; if it has `name` and `inputSchema`, it is MCP format; if it has `name` and no schema key, default to Anthropic. | Status: not_done
+- [x] **Implement format detector in `src/format-detector.ts`** — Write a function that accepts a `ToolDefinition[]` and returns `'openai' | 'anthropic' | 'mcp'`. Detection rules: if the object has `type: 'function'` and `function.name`, it is OpenAI format; if it has `name` and `input_schema`, it is Anthropic format; if it has `name` and `inputSchema`, it is MCP format; if it has `name` and no schema key, default to Anthropic. | Status: done
 - [ ] **Handle mixed format arrays** — If the tool array contains a mix of OpenAI and Anthropic/MCP formats, throw a descriptive error. All tools in a single call must be the same format (or auto-detectable as a single format). | Status: not_done
 - [ ] **Support explicit format override** — When the caller passes `options.provider`, skip auto-detection and use the specified format. The detector should still validate that the tools are structurally compatible with the specified format. | Status: not_done
 - [ ] **Write format detection tests in `src/__tests__/format-detector.test.ts`** — Test cases: OpenAI format detected correctly, Anthropic format detected correctly, MCP format detected correctly, ambiguous (name only, no schema) defaults to Anthropic, mixed array throws error, explicit provider override works. | Status: not_done
 
 ## Phase 4: JSON Schema Walker
 
-- [ ] **Implement schema walker in `src/schema-walker.ts`** — Write a tree-traversal utility that walks a `JsonSchema` object and extracts metadata: property names, types, descriptions, enum values, required fields, nesting depth, `additionalProperties` usage, `default` values, `examples` arrays, and `oneOf`/`anyOf`/`allOf` combinators. | Status: not_done
-- [ ] **Calculate maximum nesting depth** — Recursively walk nested `properties` and `items` to determine the deepest level. Flat schema = depth 0, one level of nesting = depth 1, etc. | Status: not_done
-- [ ] **Count parameters, required parameters, enum parameters, and total enum values** — Walk the schema and count: total number of top-level properties (`parameterCount`), number of properties in the `required` array (`requiredParameterCount`), number of properties with `enum` constraints (`enumParameterCount`), and total number of enum values across all properties (`totalEnumValues`). | Status: not_done
+- [x] **Implement schema walker in `src/schema-walker.ts`** — Write a tree-traversal utility that walks a `JsonSchema` object and extracts metadata: property names, types, descriptions, enum values, required fields, nesting depth, `additionalProperties` usage, `default` values, `examples` arrays, and `oneOf`/`anyOf`/`allOf` combinators. | Status: done
+- [x] **Calculate maximum nesting depth** — Recursively walk nested `properties` and `items` to determine the deepest level. Flat schema = depth 0, one level of nesting = depth 1, etc. | Status: done
+- [x] **Count parameters, required parameters, enum parameters, and total enum values** — Walk the schema and count: total number of top-level properties (`parameterCount`), number of properties in the `required` array (`requiredParameterCount`), number of properties with `enum` constraints (`enumParameterCount`), and total number of enum values across all properties (`totalEnumValues`). | Status: done
 - [ ] **Handle edge cases in schema walker** — Support: empty `properties` object, `undefined` properties, deeply nested schemas (10+ levels), `$ref` references (treat as opaque, do not resolve), `oneOf`/`anyOf`/`allOf` combinators (walk each branch), array items with complex schemas. | Status: not_done
 - [ ] **Write schema walker tests in `src/__tests__/schema-walker.test.ts`** — Test: flat schema, nested schema, deeply nested schema (10+ levels), schema with enums, schema with arrays, schema with combinators, empty schema, schema with `$ref`, parameter and enum counting accuracy, nesting depth calculation. | Status: not_done
 
 ## Phase 5: Token Counting
 
-- [ ] **Implement heuristic token counter in `src/token-counter.ts`** — Default counter using `Math.ceil(text.length / 3.9)`. The ratio 3.9 chars/token is calibrated for JSON/TypeScript-like syntax. Export a function `countTokensHeuristic(text: string): number`. | Status: not_done
+- [x] **Implement heuristic token counter in `src/token-counter.ts`** — Default counter using `Math.ceil(text.length / 3.9)`. The ratio 3.9 chars/token is calibrated for JSON/TypeScript-like syntax. Export a function `countTokensHeuristic(text: string): number`. | Status: done
 - [ ] **Implement tiktoken integration in `src/token-counter.ts`** — Optionally load `js-tiktoken` and use the appropriate BPE encoding (`cl100k_base` for GPT-4, `o200k_base` for newer models). Handle the case where `js-tiktoken` is not installed (fall back to heuristic with a warning or throw if explicitly requested). | Status: not_done
 - [ ] **Support custom token counter function** — When `options.tokenCounter` is provided, use it directly instead of the heuristic or tiktoken. The custom function signature is `(text: string) => number`. | Status: not_done
 - [ ] **Create token counter factory** — Export a `createTokenCounter(options)` function that returns the appropriate counter based on `options.tokenizer` and `options.tokenCounter`. Used internally by `estimateTools` and `createEstimator`. | Status: not_done
@@ -40,22 +40,22 @@
 
 - [ ] **Implement OpenAI serializer in `src/openai-serializer.ts`** — Serialize tool definitions into the TypeScript-like namespace format that OpenAI uses internally. Generate the preamble (`namespace functions {\n\n`), per-tool function signatures, description comments, parameter types, optional markers, enum unions, and closing braces. Follow the exact serialization rules in the spec (Section 5). | Status: not_done
 - [ ] **Serialize string parameters** — Output `paramName: string`. If the parameter has an `enum`, output `paramName: "val1" | "val2" | "val3"`. | Status: not_done
-- [ ] **Serialize number/integer parameters** — Output `paramName: number`. | Status: not_done
-- [ ] **Serialize boolean parameters** — Output `paramName: boolean`. | Status: not_done
+- [x] **Serialize number/integer parameters** — Output `paramName: number`. | Status: done
+- [x] **Serialize boolean parameters** — Output `paramName: boolean`. | Status: done
 - [ ] **Serialize array parameters** — Output `paramName: <itemType>[]`. For complex item types, expand the inner type inline. | Status: not_done
 - [ ] **Serialize nested object parameters** — Output `paramName: { <properties> }` with recursive per-property serialization. | Status: not_done
-- [ ] **Handle optional parameters** — Parameters not listed in `required` get a `?` suffix: `paramName?: type`. | Status: not_done
-- [ ] **Handle tool descriptions** — Serialize descriptions as `// <description>\n` comments before the function signature. Omit the comment line if the tool has no description. | Status: not_done
-- [ ] **Handle parameter descriptions** — Serialize parameter descriptions as `// <description>` inline comments after the parameter type on the same line. | Status: not_done
+- [x] **Handle optional parameters** — Parameters not listed in `required` get a `?` suffix: `paramName?: type`. | Status: done
+- [x] **Handle tool descriptions** — Serialize descriptions as `// <description>\n` comments before the function signature. Omit the comment line if the tool has no description. | Status: done
+- [x] **Handle parameter descriptions** — Serialize parameter descriptions as `// <description>` inline comments after the parameter type on the same line. | Status: done
 - [ ] **Handle tools with no parameters** — Serialize as a function with empty parameter object: `type name = (_: {}) => any;`. | Status: not_done
-- [ ] **Generate namespace preamble** — Output `namespace functions {\n\n` once for the entire tool set. Count the preamble tokens separately as `preambleTokens`. | Status: not_done
+- [x] **Generate namespace preamble** — Output `namespace functions {\n\n` once for the entire tool set. Count the preamble tokens separately as `preambleTokens`. | Status: done
 - [ ] **Write OpenAI serializer tests in `src/__tests__/openai-serializer.test.ts`** — Test all cases from spec Section 13: no params, string param, enum param, number param, boolean param, array param, nested object, optional markers, description comments, param descriptions, no description omits comment, multiple tools share preamble, empty parameters. | Status: not_done
 
 ## Phase 7: Tool Serialization — Anthropic/MCP Format
 
-- [ ] **Implement JSON serializer in `src/json-serializer.ts`** — Serialize tool definitions into compact JSON format matching Anthropic's representation. Output `{ "name": ..., "description": ..., "input_schema": { "type": "object", "properties": {...}, "required": [...] } }`. For MCP format, use `inputSchema` instead of `input_schema`. | Status: not_done
-- [ ] **Preserve all JSON Schema fields** — Include all schema fields (type, properties, descriptions, enums, defaults, additionalProperties, etc.) in the serialized output. | Status: not_done
-- [ ] **Handle nested schemas in JSON serialization** — Recursively serialize nested `properties` and `items` with proper structure. | Status: not_done
+- [x] **Implement JSON serializer in `src/json-serializer.ts`** — Serialize tool definitions into compact JSON format matching Anthropic's representation. Output `{ "name": ..., "description": ..., "input_schema": { "type": "object", "properties": {...}, "required": [...] } }`. For MCP format, use `inputSchema` instead of `input_schema`. | Status: done
+- [x] **Preserve all JSON Schema fields** — Include all schema fields (type, properties, descriptions, enums, defaults, additionalProperties, etc.) in the serialized output. | Status: done
+- [x] **Handle nested schemas in JSON serialization** — Recursively serialize nested `properties` and `items` with proper structure. | Status: done
 - [ ] **Write JSON serializer tests in `src/__tests__/json-serializer.test.ts`** — Test: compact JSON output matches expected format, all JSON Schema fields preserved, nested schemas serialize correctly, Anthropic `input_schema` vs MCP `inputSchema` key naming. | Status: not_done
 
 ## Phase 8: Serializer Dispatcher
@@ -65,12 +65,12 @@
 
 ## Phase 9: Per-Tool Token Breakdown
 
-- [ ] **Implement per-tool analysis logic** — For each tool, compute the `ToolAnalysis` object: count tokens for each component (name, description, parameters, enums, structural), compute `totalTokens` as the sum, compute `percentOfTotal` relative to the entire tool set, and populate metadata fields (`parameterCount`, `requiredParameterCount`, `enumParameterCount`, `totalEnumValues`, `descriptionLength`, `maxNestingDepth`). | Status: not_done
-- [ ] **Compute `breakdown.nameTokens`** — Count tokens of the tool name string alone. | Status: not_done
-- [ ] **Compute `breakdown.descriptionTokens`** — Count tokens of the description text alone. | Status: not_done
-- [ ] **Compute `breakdown.parameterTokens`** — Count tokens for all parameter names, types, descriptions, and constraints combined. | Status: not_done
+- [x] **Implement per-tool analysis logic** — For each tool, compute the `ToolAnalysis` object: count tokens for each component (name, description, parameters, enums, structural), compute `totalTokens` as the sum, compute `percentOfTotal` relative to the entire tool set, and populate metadata fields (`parameterCount`, `requiredParameterCount`, `enumParameterCount`, `totalEnumValues`, `descriptionLength`, `maxNestingDepth`). | Status: done
+- [x] **Compute `breakdown.nameTokens`** — Count tokens of the tool name string alone. | Status: done
+- [x] **Compute `breakdown.descriptionTokens`** — Count tokens of the description text alone. | Status: done
+- [x] **Compute `breakdown.parameterTokens`** — Count tokens for all parameter names, types, descriptions, and constraints combined. | Status: done
 - [ ] **Compute `breakdown.enumTokens`** — Count tokens for all enum value lists across all parameters. This is a subset of `parameterTokens`. | Status: not_done
-- [ ] **Compute `breakdown.structuralTokens`** — Calculate as the residual: `totalTokens - nameTokens - descriptionTokens - parameterTokens`. This captures braces, colons, commas, function signature wrapper, etc. | Status: not_done
+- [x] **Compute `breakdown.structuralTokens`** — Calculate as the residual: `totalTokens - nameTokens - descriptionTokens - parameterTokens`. This captures braces, colons, commas, function signature wrapper, etc. | Status: done
 - [ ] **Include serialized output when requested** — When `options.includeSerialized` is `true`, set the `serialized` field on each `ToolAnalysis` with the full serialized string. Omit it otherwise. | Status: not_done
 
 ## Phase 10: Cost Projections
@@ -85,50 +85,50 @@
 
 ## Phase 11: `estimateTools()` Main Function
 
-- [ ] **Implement `estimateTools()` in `src/estimate-tools.ts`** — This is the primary entry point. It orchestrates: (1) format detection, (2) serialization, (3) token counting, (4) per-tool analysis, (5) aggregate stats, and (6) cost projections. Returns a `ToolCostReport`. | Status: not_done
-- [ ] **Compute `totalTokens`** — Sum of all per-tool `totalTokens` plus `preambleTokens`. | Status: not_done
-- [ ] **Compute `contextWindowPercent`** — `(totalTokens / contextWindow) * 100`. Default context window is 128,000. | Status: not_done
+- [x] **Implement `estimateTools()` in `src/estimate-tools.ts`** — This is the primary entry point. It orchestrates: (1) format detection, (2) serialization, (3) token counting, (4) per-tool analysis, (5) aggregate stats, and (6) cost projections. Returns a `ToolCostReport`. | Status: done
+- [x] **Compute `totalTokens`** — Sum of all per-tool `totalTokens` plus `preambleTokens`. | Status: done
+- [x] **Compute `contextWindowPercent`** — `(totalTokens / contextWindow) * 100`. Default context window is 128,000. | Status: done
 - [ ] **Compute summary statistics** — Calculate `meanTokensPerTool`, `medianTokensPerTool`, `minTokens`, `maxTokens`, `mostExpensiveTool`, `leastExpensiveTool`. | Status: not_done
 - [ ] **Sort perTool by totalTokens descending** — The `perTool` array in the report must be sorted by `totalTokens` in descending order. | Status: not_done
-- [ ] **Handle empty tools array** — If the input is an empty array, return a report with zero totals, empty `perTool`, empty `costProjections`, and sensible defaults for stats. | Status: not_done
-- [ ] **Handle single tool** — A single-tool array should produce that tool as both `mostExpensiveTool` and `leastExpensiveTool`. | Status: not_done
-- [ ] **Ensure synchronous operation** — The function must be synchronous (no async/await). It uses the heuristic tokenizer by default. For tiktoken, users must use `createEstimator()`. | Status: not_done
-- [ ] **Write `estimateTools()` tests in `src/__tests__/estimate-tools.test.ts`** — Test: basic 2-tool estimation matches expected structure, totalTokens is sum of perTool plus preamble, contextWindowPercent calculated correctly, stats are accurate, perTool is sorted descending, empty array handled, single tool handled, OpenAI format works, Anthropic format works, MCP format works, custom tokenCounter works, includeSerialized works. | Status: not_done
+- [x] **Handle empty tools array** — If the input is an empty array, return a report with zero totals, empty `perTool`, empty `costProjections`, and sensible defaults for stats. | Status: done
+- [x] **Handle single tool** — A single-tool array should produce that tool as both `mostExpensiveTool` and `leastExpensiveTool`. | Status: done
+- [x] **Ensure synchronous operation** — The function must be synchronous (no async/await). It uses the heuristic tokenizer by default. For tiktoken, users must use `createEstimator()`. | Status: done
+- [x] **Write `estimateTools()` tests in `src/__tests__/estimate-tools.test.ts`** — Test: basic 2-tool estimation matches expected structure, totalTokens is sum of perTool plus preamble, contextWindowPercent calculated correctly, stats are accurate, perTool is sorted descending, empty array handled, single tool handled, OpenAI format works, Anthropic format works, MCP format works, custom tokenCounter works, includeSerialized works. | Status: done
 
 ## Phase 12: `analyzeToolSet()` Function
 
-- [ ] **Implement `analyzeToolSet()` in `src/analyze-tool-set.ts`** — Extends `estimateTools()` to produce a `ToolSetAnalysis` with additional fields: `contextWindowUsage` (percentage at multiple window sizes), `outliers` (tools exceeding threshold * median), and `ranking` (tools sorted by cost with rank numbers). | Status: not_done
-- [ ] **Compute context window usage at multiple sizes** — Default sizes: `{ '128k': 128000, '32k': 32000, '8k': 8000 }`. Overridable via `options.contextWindows`. | Status: not_done
-- [ ] **Implement outlier detection** — A tool is an outlier if `toolTokens > outlierThreshold * medianTokens`. Default threshold is 2.0. For each outlier, include `name`, `totalTokens`, `medianTokens`, `ratio`, and `reason` (descriptive string). | Status: not_done
-- [ ] **Generate ranking array** — Sort tools by `totalTokens` descending. Each entry has `rank` (1-indexed), `name`, `totalTokens`, `percentOfTotal`. | Status: not_done
-- [ ] **Write `analyzeToolSet()` tests in `src/__tests__/analyze-tool-set.test.ts`** — Test: contextWindowUsage at multiple sizes, outliers detected when threshold exceeded, no outliers when all tools similar, ranking sorted correctly, empty array produces empty results, single tool is rank 1 with no outliers, custom outlierThreshold works, custom contextWindows works. | Status: not_done
+- [x] **Implement `analyzeToolSet()` in `src/analyze-tool-set.ts`** — Extends `estimateTools()` to produce a `ToolSetAnalysis` with additional fields: `contextWindowUsage` (percentage at multiple window sizes), `outliers` (tools exceeding threshold * median), and `ranking` (tools sorted by cost with rank numbers). | Status: done
+- [x] **Compute context window usage at multiple sizes** — Default sizes: `{ '128k': 128000, '32k': 32000, '8k': 8000 }`. Overridable via `options.contextWindows`. | Status: done
+- [x] **Implement outlier detection** — A tool is an outlier if `toolTokens > outlierThreshold * medianTokens`. Default threshold is 2.0. For each outlier, include `name`, `totalTokens`, `medianTokens`, `ratio`, and `reason` (descriptive string). | Status: done
+- [x] **Generate ranking array** — Sort tools by `totalTokens` descending. Each entry has `rank` (1-indexed), `name`, `totalTokens`, `percentOfTotal`. | Status: done
+- [x] **Write `analyzeToolSet()` tests in `src/__tests__/analyze-tool-set.test.ts`** — Test: contextWindowUsage at multiple sizes, outliers detected when threshold exceeded, no outliers when all tools similar, ranking sorted correctly, empty array produces empty results, single tool is rank 1 with no outliers, custom outlierThreshold works, custom contextWindows works. | Status: done
 
 ## Phase 13: Optimization Suggestion Rules
 
-- [ ] **Implement Rule 1: `shorten-description`** — Trigger when tool description exceeds 200 characters (configurable via `descriptionLengthThreshold`). Estimate savings as the token difference between current description and a 100-character version. Generate a message showing current length, token count, and suggested shorter version. | Status: not_done
-- [ ] **Implement Rule 2: `trim-param-descriptions`** — Trigger when any parameter description exceeds 100 characters, or sum of all parameter descriptions exceeds 300 characters. Identify self-documenting parameter names where descriptions add little value. Estimate savings from removing or shortening. | Status: not_done
-- [ ] **Implement Rule 3: `reduce-enum`** — Trigger when any parameter has an enum with more than 10 values (configurable via `enumSizeThreshold`). Estimate savings from replacing the enum with a string type and brief description. | Status: not_done
-- [ ] **Implement Rule 4: `remove-optional-params`** — Trigger when a tool has more than 5 optional parameters (configurable via `optionalParamThreshold`). Suggest splitting into basic and advanced tool variants. | Status: not_done
-- [ ] **Implement Rule 5: `flatten-schema`** — Trigger when parameter schema nesting depth exceeds 2 levels (configurable via `nestingDepthThreshold`). Estimate savings from flattening nested objects to dot-notation. | Status: not_done
+- [x] **Implement Rule 1: `shorten-description`** — Trigger when tool description exceeds 200 characters (configurable via `descriptionLengthThreshold`). Estimate savings as the token difference between current description and a 100-character version. Generate a message showing current length, token count, and suggested shorter version. | Status: done
+- [x] **Implement Rule 2: `trim-param-descriptions`** — Trigger when any parameter description exceeds 100 characters, or sum of all parameter descriptions exceeds 300 characters. Identify self-documenting parameter names where descriptions add little value. Estimate savings from removing or shortening. | Status: done
+- [x] **Implement Rule 3: `reduce-enum`** — Trigger when any parameter has an enum with more than 10 values (configurable via `enumSizeThreshold`). Estimate savings from replacing the enum with a string type and brief description. | Status: done
+- [x] **Implement Rule 4: `remove-optional-params`** — Trigger when a tool has more than 5 optional parameters (configurable via `optionalParamThreshold`). Suggest splitting into basic and advanced tool variants. | Status: done
+- [x] **Implement Rule 5: `flatten-schema`** — Trigger when parameter schema nesting depth exceeds 2 levels (configurable via `nestingDepthThreshold`). Estimate savings from flattening nested objects to dot-notation. | Status: done
 - [ ] **Implement Rule 6: `merge-similar-tools`** — Trigger when two or more tools share a common name prefix and have >50% parameter name overlap. Estimate savings from eliminating redundant per-tool structural overhead. | Status: not_done
-- [ ] **Implement Rule 7: `filter-per-request`** — Trigger when total tool set exceeds 15 tools (configurable via `toolCountThreshold`). This is a cross-tool suggestion (toolName = `'*'`). Estimate savings assuming 30-50% of tools are relevant per request. | Status: not_done
-- [ ] **Implement Rule 8: `remove-redundant-fields`** — Trigger when schema includes `additionalProperties: false`, `default` values, or `examples` arrays. Count tokens consumed by these fields and suggest removal. | Status: not_done
+- [x] **Implement Rule 7: `filter-per-request`** — Trigger when total tool set exceeds 15 tools (configurable via `toolCountThreshold`). This is a cross-tool suggestion (toolName = `'*'`). Estimate savings assuming 30-50% of tools are relevant per request. | Status: done
+- [x] **Implement Rule 8: `remove-redundant-fields`** — Trigger when schema includes `additionalProperties: false`, `default` values, or `examples` arrays. Count tokens consumed by these fields and suggest removal. | Status: done
 - [ ] **Write suggestion rule tests in `src/__tests__/suggestion-rules.test.ts`** — Test each rule independently: trigger condition met produces suggestion, trigger condition not met produces nothing. Test with exact threshold boundary values. Test that estimated savings are reasonable. | Status: not_done
 
 ## Phase 14: `suggestOptimizations()` Function
 
-- [ ] **Implement `suggestOptimizations()` in `src/suggest-optimizations.ts`** — Run all 8 suggestion rules against the tool set. Collect all suggestions, sort by `estimatedSavings` descending, assign sequential `priority` values (1 = highest savings), and compute `severity` (`high` > 100 tokens, `medium` 20-100, `low` < 20). | Status: not_done
+- [x] **Implement `suggestOptimizations()` in `src/suggest-optimizations.ts`** — Run all 8 suggestion rules against the tool set. Collect all suggestions, sort by `estimatedSavings` descending, assign sequential `priority` values (1 = highest savings), and compute `severity` (`high` > 100 tokens, `medium` 20-100, `low` < 20). | Status: done
 - [ ] **Apply `minSavings` filter** — Exclude suggestions with `estimatedSavings` below `options.minSavings` (default 5 tokens). | Status: not_done
 - [ ] **Apply `maxSuggestions` limit** — Return at most `options.maxSuggestions` suggestions (default 20). | Status: not_done
-- [ ] **Write `suggestOptimizations()` tests in `src/__tests__/suggest-optimizations.test.ts`** — Test: suggestions sorted by savings descending, priority is sequential from 1, severity thresholds are correct, minSavings filters low-impact suggestions, maxSuggestions limits output, all 8 rule types can appear in results, empty tools array returns empty suggestions. | Status: not_done
+- [x] **Write `suggestOptimizations()` tests in `src/__tests__/suggest-optimizations.test.ts`** — Test: suggestions sorted by savings descending, priority is sequential from 1, severity thresholds are correct, minSavings filters low-impact suggestions, maxSuggestions limits output, all 8 rule types can appear in results, empty tools array returns empty suggestions. | Status: done
 
 ## Phase 15: `createEstimator()` Factory
 
-- [ ] **Implement `createEstimator()` in `src/create-estimator.ts`** — Async factory that returns an `Estimator` object with `estimate()`, `analyze()`, and `suggest()` methods. Pre-configures the provider, model, tokenizer, context window, and price points from `EstimatorConfig`. | Status: not_done
+- [x] **Implement `createEstimator()` in `src/create-estimator.ts`** — Async factory that returns an `Estimator` object with `estimate()`, `analyze()`, and `suggest()` methods. Pre-configures the provider, model, tokenizer, context window, and price points from `EstimatorConfig`. | Status: done
 - [ ] **Handle tiktoken initialization** — When `tokenizer: 'tiktoken'` is specified, asynchronously load `js-tiktoken` and initialize the appropriate BPE encoder. Cache the encoder for reuse across calls. If `js-tiktoken` is not installed, throw a clear error. | Status: not_done
-- [ ] **Handle heuristic tokenizer** — When `tokenizer: 'heuristic'` (default), resolve the promise immediately without loading any external module. | Status: not_done
-- [ ] **Bind configuration to methods** — The returned `estimate()`, `analyze()`, and `suggest()` methods should use the pre-configured options from `EstimatorConfig`, merging them with the tool definitions passed to each call. | Status: not_done
-- [ ] **Write `createEstimator()` tests in `src/__tests__/create-estimator.test.ts`** — Test: returns object with `estimate`, `analyze`, `suggest` methods, pre-configured provider is used, pre-configured context window is used, heuristic tokenizer works, tiktoken tokenizer initializes (with devDependency), custom tokenCounter works, config is reused across multiple calls. | Status: not_done
+- [x] **Handle heuristic tokenizer** — When `tokenizer: 'heuristic'` (default), resolve the promise immediately without loading any external module. | Status: done
+- [x] **Bind configuration to methods** — The returned `estimate()`, `analyze()`, and `suggest()` methods should use the pre-configured options from `EstimatorConfig`, merging them with the tool definitions passed to each call. | Status: done
+- [x] **Write `createEstimator()` tests in `src/__tests__/create-estimator.test.ts`** — Test: returns object with `estimate`, `analyze`, `suggest` methods, pre-configured provider is used, pre-configured context window is used, heuristic tokenizer works, tiktoken tokenizer initializes (with devDependency), custom tokenCounter works, config is reused across multiple calls. | Status: done
 
 ## Phase 16: CLI Implementation
 
@@ -148,9 +148,9 @@
 
 ## Phase 17: Edge Cases and Error Handling
 
-- [ ] **Handle tool with empty string name** — Produce 0 name tokens, still count other components. | Status: not_done
-- [ ] **Handle tool with no description (`undefined`)** — Produce 0 description tokens, omit description comment in OpenAI serialization. | Status: not_done
-- [ ] **Handle tool with no parameters** — `parameters` is `undefined` or empty `{ type: 'object', properties: {} }`. Produce 0 parameter tokens, serialize as empty parameter object. | Status: not_done
+- [x] **Handle tool with empty string name** — Produce 0 name tokens, still count other components. | Status: done
+- [x] **Handle tool with no description (`undefined`)** — Produce 0 description tokens, omit description comment in OpenAI serialization. | Status: done
+- [x] **Handle tool with no parameters** — `parameters` is `undefined` or empty `{ type: 'object', properties: {} }`. Produce 0 parameter tokens, serialize as empty parameter object. | Status: done
 - [ ] **Handle deeply nested schemas (10+ levels)** — Schema walker and serializer must handle deep recursion without stack overflow. Consider iterative approach if needed. | Status: not_done
 - [ ] **Handle recursive schemas (`$ref`)** — Treat `$ref` as opaque (do not attempt to resolve). Count the `$ref` string as tokens but do not follow it. | Status: not_done
 - [ ] **Handle `oneOf`/`anyOf`/`allOf` combinators** — Walk each branch of the combinator and count tokens for all alternatives. | Status: not_done
@@ -163,18 +163,18 @@
 
 ## Phase 18: Integration Testing
 
-- [ ] **End-to-end test: OpenAI tools through full pipeline** — Create a realistic set of 5-10 OpenAI-format tools, run `estimateTools()`, verify the report structure, token counts are reasonable, stats are accurate, cost projections are computed. | Status: not_done
-- [ ] **End-to-end test: Anthropic tools through full pipeline** — Same as above but with Anthropic-format tools. Verify JSON serialization is used. | Status: not_done
-- [ ] **End-to-end test: MCP tools through full pipeline** — Same as above but with MCP-format tools (`inputSchema`). | Status: not_done
-- [ ] **End-to-end test: `analyzeToolSet()` with outliers** — Create a tool set where one tool is deliberately 3x larger than the median. Verify it appears in the `outliers` array. | Status: not_done
+- [x] **End-to-end test: OpenAI tools through full pipeline** — Create a realistic set of 5-10 OpenAI-format tools, run `estimateTools()`, verify the report structure, token counts are reasonable, stats are accurate, cost projections are computed. | Status: done
+- [x] **End-to-end test: Anthropic tools through full pipeline** — Same as above but with Anthropic-format tools. Verify JSON serialization is used. | Status: done
+- [x] **End-to-end test: MCP tools through full pipeline** — Same as above but with MCP-format tools (`inputSchema`). | Status: done
+- [x] **End-to-end test: `analyzeToolSet()` with outliers** — Create a tool set where one tool is deliberately 3x larger than the median. Verify it appears in the `outliers` array. | Status: done
 - [ ] **End-to-end test: `suggestOptimizations()` with all rule types** — Create a tool set that triggers all 8 optimization rules. Verify all 8 suggestion types appear in the output. | Status: not_done
-- [ ] **End-to-end test: `createEstimator()` with heuristic** — Create an estimator with heuristic tokenizer, call `estimate()`, `analyze()`, and `suggest()`, verify all return correct types. | Status: not_done
+- [x] **End-to-end test: `createEstimator()` with heuristic** — Create an estimator with heuristic tokenizer, call `estimate()`, `analyze()`, and `suggest()`, verify all return correct types. | Status: done
 - [ ] **End-to-end test: `compare` CLI command** — Create two tool definition files (before/after), run the CLI `compare` command, verify output shows correct deltas. | Status: not_done
 - [ ] **End-to-end test: large tool set performance** — Create 100+ tools, run `estimateTools()`, verify it completes in under 50ms. | Status: not_done
 
 ## Phase 19: Public API Exports
 
-- [ ] **Wire up all exports in `src/index.ts`** — Export `estimateTools`, `analyzeToolSet`, `suggestOptimizations`, `createEstimator` as named function exports. Export all types with `export type { ... }`. Ensure no internal implementation details leak through the public API. | Status: not_done
+- [x] **Wire up all exports in `src/index.ts`** — Export `estimateTools`, `analyzeToolSet`, `suggestOptimizations`, `createEstimator` as named function exports. Export all types with `export type { ... }`. Ensure no internal implementation details leak through the public API. | Status: done
 - [ ] **Verify TypeScript declarations** — Run `tsc` and verify that `dist/index.d.ts` contains all expected type exports and function signatures. Ensure consumers get full autocomplete and type checking. | Status: not_done
 
 ## Phase 20: Build, Lint, and Test Verification
