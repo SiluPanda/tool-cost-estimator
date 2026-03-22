@@ -3,6 +3,7 @@
 Estimate the token cost of LLM tool definitions in the context window.
 
 [![npm version](https://img.shields.io/npm/v/tool-cost-estimator.svg)](https://www.npmjs.com/package/tool-cost-estimator)
+[![npm downloads](https://img.shields.io/npm/dt/tool-cost-estimator.svg)](https://www.npmjs.com/package/tool-cost-estimator)
 [![license](https://img.shields.io/npm/l/tool-cost-estimator.svg)](https://github.com/SiluPanda/tool-cost-estimator/blob/master/LICENSE)
 [![node](https://img.shields.io/node/v/tool-cost-estimator.svg)](https://nodejs.org)
 

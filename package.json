@@ -1,6 +1,6 @@
 {
   "name": "tool-cost-estimator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Estimate token cost of tool definitions in the context window",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
