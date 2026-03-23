@@ -190,8 +190,20 @@ describe('estimateTools', () => {
   it('percentOfTotal values sum close to 100 for single tool', () => {
     const report = estimateTools([simpleTool]);
     const sum = report.perTool.reduce((s, t) => s + t.percentOfTotal, 0);
-    expect(sum).toBeGreaterThan(0);
-    expect(sum).toBeLessThanOrEqual(100);
+    expect(sum).toBeCloseTo(100, 1);
+  });
+
+  it('percentOfTotal values sum to 100 across multiple tools', () => {
+    const report = estimateTools([simpleTool, anthropicTool, verboseTool]);
+    const sum = report.perTool.reduce((s, t) => s + t.percentOfTotal, 0);
+    expect(sum).toBeCloseTo(100, 1);
+  });
+
+  it('perTool is sorted by totalTokens descending', () => {
+    const report = estimateTools([simpleTool, verboseTool, anthropicTool]);
+    for (let i = 1; i < report.perTool.length; i++) {
+      expect(report.perTool[i - 1].totalTokens).toBeGreaterThanOrEqual(report.perTool[i].totalTokens);
+    }
   });
 });
 

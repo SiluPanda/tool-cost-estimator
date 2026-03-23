@@ -63,12 +63,16 @@ export function estimateTools(
     };
   });
 
-  const totalTokens = perTool.reduce((sum, t) => sum + t.totalTokens, 0) + PREAMBLE_TOKENS;
+  const toolOnlyTokens = perTool.reduce((sum, t) => sum + t.totalTokens, 0);
+  const totalTokens = toolOnlyTokens + PREAMBLE_TOKENS;
 
-  // Fill percentOfTotal
+  // Fill percentOfTotal (exclude preamble so percentages sum to 100%)
   for (const t of perTool) {
-    t.percentOfTotal = totalTokens > 0 ? (t.totalTokens / totalTokens) * 100 : 0;
+    t.percentOfTotal = toolOnlyTokens > 0 ? (t.totalTokens / toolOnlyTokens) * 100 : 0;
   }
+
+  // Sort perTool by totalTokens descending
+  perTool.sort((a, b) => b.totalTokens - a.totalTokens);
 
   const toolTokens = perTool.map((t) => t.totalTokens).sort((a, b) => a - b);
   const mean = toolTokens.length > 0 ? toolTokens.reduce((s, v) => s + v, 0) / toolTokens.length : 0;
